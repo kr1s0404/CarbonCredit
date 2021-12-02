@@ -12,13 +12,15 @@ import FirebaseStorage
 
 public class FirestoreManager: ObservableObject
 {
-    @ObservedObject var fetchUserInfo = FetchUserInfo()
+    var fetch = FetchUserInfo()
     
     func storeUserInfo(profileImageURL: URL)
     {
         guard let uid = FirebaseManger.shared.auth.currentUser?.uid else { return }
         guard let email = FirebaseManger.shared.auth.currentUser?.email else { return }
-        let userData = ["email": email, "uid": uid, "profileImageURL": profileImageURL.absoluteString]
+        let userName = fetch.userName ?? "尚未建立名稱"
+        let nickName = fetch.nickName ?? "尚未建立暱稱"
+        let userData = ["email": email, "uid": uid, "profileImageURL": profileImageURL.absoluteString, "userName": userName, "nickName": nickName]
         
         FirebaseManger.shared.firestore.collection("users")
             .document(uid)

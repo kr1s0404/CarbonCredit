@@ -13,6 +13,7 @@ import FirebaseStorage
 public class StorageManager: ObservableObject
 {
     var firestoreManger = FirestoreManager()
+    var user : UserInfo?
     
     func persistImageToStorage(userProfileImage: UIImage?)
     {
@@ -42,8 +43,12 @@ public class StorageManager: ObservableObject
             }
             
             guard let url = url else { return }
-            self.firestoreManger.storeUserInfo(profileImageURL: url)
-            print("圖片網址 \(url)")
+            DispatchQueue.main.async {
+                self.user?.userProfileImageURL = url.absoluteString
+                self.firestoreManger.storeUserInfo(profileImageURL: url)
+            }
+            
+            print("\n圖片網址 \(url)\n")
         }
         
         

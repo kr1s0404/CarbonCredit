@@ -33,11 +33,11 @@ struct TabBarView: View
         TabView(selection: $currentTab)
         {
             
-            Text("Home")
+            NewsView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .tag(Tab.Home)
             
-            Text("Task")
+            TaskView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .tag(Tab.Task)
             
@@ -45,7 +45,7 @@ struct TabBarView: View
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .tag(Tab.Prize)
             
-            ProfileView()
+            newProfileView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .tag(Tab.Profile)
         }

@@ -10,6 +10,7 @@ import SwiftUI
 struct IntroView: View
 {
     @State var currentIndex: Int = 0
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View
     {
@@ -17,7 +18,23 @@ struct IntroView: View
         {
             DotInversion(currentIndex: $currentIndex)
                 .ignoresSafeArea()
+        
+            if(currentIndex == 2)
+            {
+                Button("完成") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(.white)
+                .padding(20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                
+            }
         }
+        .onTapGesture {
+            self.dissmissKeyboard()
+        }
+        
     }
 }
 

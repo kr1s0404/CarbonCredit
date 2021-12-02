@@ -18,7 +18,7 @@ struct IntroTab: Identifiable{
 
 // Add more tabs for more intro screens....
 var tabs: [IntroTab] = [
-    IntroTab(title: "Enter your name", subTitle: "輸入您的名字", image: "Pic1",color: Color("Green")),
-    IntroTab(title: "Enter your nickname", subTitle: "輸入您的暱稱", image: "Pic2",color: Color("DarkGrey")),
-//    IntroTab(title: "Invite", subTitle: "restaurants", image: "Pic3",color: Color("Purple")),
+    IntroTab(title: "Your name", subTitle: "輸入您的名字", image: "Pic1",color: Color("Green")),
+    IntroTab(title: "Your nickname", subTitle: "輸入您的暱稱", image: "Pic2",color: Color("DarkGrey")),
+    IntroTab(title: "All Set!", subTitle: "設置完成", image: "Pic3",color: Color("Purple")),
 ]

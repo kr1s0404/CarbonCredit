@@ -11,22 +11,29 @@ import Firebase
 import FirebaseStorage
 
 struct UserInfo {
-    var uid, email, userProfileImageURL, userName, nickName: String
+    var uid: String
+    var email: String
+    var userProfileImageURL: String
+    var userName: String
+    var nickName: String
 }
 
 class FetchUserInfo: ObservableObject
 {
-   
+    
     @Published var userInfo: UserInfo?
     @Published var errorMessage: String?
     @Published var image: UIImage?
     @Published var isLoading: Bool = false
     @Published var userName: String?
     @Published var nickName: String?
+    
     init ()
     {
         fetchCurrentUser()
         fetchImageURL()
+        fetchNickName()
+        fetchUserName()
     }
     
     func fetchCurrentUser()
@@ -46,9 +53,8 @@ class FetchUserInfo: ObservableObject
             let userProfileImageURL = data["profileImageURL"] as? String ?? ""
             let userName = data["userName"] as? String ?? ""
             let nickName = data["nickName"] as? String ?? ""
-            self.nickName = nickName
-            print(userName, self.nickName)
-            self.userInfo = UserInfo(uid: uid, email: email, userProfileImageURL: userProfileImageURL, userName: userName, nickName: nickName )
+            
+            self.userInfo = UserInfo(uid: uid, email: email, userProfileImageURL: userProfileImageURL, userName: userName, nickName: nickName)
             
         }
     }
@@ -89,36 +95,51 @@ class FetchUserInfo: ObservableObject
         return email
     }
     
-    func fetchUserName() -> String
+    func fetchUserName()
     {
-        guard let uid = FirebaseManger.shared.auth.currentUser?.uid else { return "Fail UID"}
+        guard let uid = FirebaseManger.shared.auth.currentUser?.uid else { return }
+        let db = FirebaseManger.shared.firestore
+        let ref = db.collection("users").document(uid)
         
-        FirebaseManger.shared.firestore.collection("users").document(uid).getDocument{ snapshot, error in
-            if let error = error {
-                print("無法讀取當前使用者資訊\n\(error)")
+        ref.addSnapshotListener { documentSnapshot, error in
+            guard let document = documentSnapshot else {
+                print("Error fetching document: \(error!)")
                 return
             }
-            
-            guard let data = snapshot?.data() else { return }
-            self.userName = data["userName"] as? String ?? ""
+            guard let data = document.data() else {
+                print("Document data was empty.")
+                return
+            }
+            self.userName = data["userName"] as? String ?? "尚未建立名稱"
         }
-        return userName ?? "Fail"
     }
     
-    func fetchNickName() -> String
+    func fetchNickName()
     {
-        guard let uid = FirebaseManger.shared.auth.currentUser?.uid else { return "Fail UID"}
+        guard let uid = FirebaseManger.shared.auth.currentUser?.uid else { return }
+        let db = FirebaseManger.shared.firestore
+        let ref = db.collection("users").document(uid)
         
-        FirebaseManger.shared.firestore.collection("users").document(uid).getDocument{ snapshot, error in
-            if let error = error {
-                print("無法讀取當前使用者資訊\n\(error)")
+        ref.addSnapshotListener { documentSnapshot, error in
+            guard let document = documentSnapshot else {
+                print("Error fetching document: \(error!)")
                 return
             }
-            
-            guard let data = snapshot?.data() else { return }
-            
-            self.nickName = data["nickName"] as? String ?? ""
+            guard let data = document.data() else {
+                print("Document data was empty.")
+                return
+            }
+            self.nickName = data["nickName"] as? String ?? "尚未建立暱稱"
         }
-        return nickName ?? "Fail"
+    }
+    
+    func getUserName() -> String
+    {
+        return userInfo?.userName ?? "no userName"
+    }
+    
+    func getNickName() -> String
+    {
+        return userInfo?.nickName ?? "no nickName"
     }
 }

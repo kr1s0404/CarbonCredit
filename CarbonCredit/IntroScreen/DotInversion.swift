@@ -27,6 +27,7 @@ struct DotInversion: View {
     @State var userName: String = ""
     @State var nickName: String = ""
     
+    
     var firestoreManger = FirestoreManager()
     
     var body: some View {
@@ -70,93 +71,100 @@ struct DotInversion: View {
                     
                     GeometryReader{proxy in
                         
-                        Circle()
-                        // While increasing the scale the content will be visible...
-                            .frame(width: 80, height: 80)
-                            .scaleEffect(dotScale)
-                            .rotation3DEffect(.init(degrees: dotRotation), axis: (x: 0, y: 1, z: 0), anchorZ: dotState == .flipped ? -10 : 10, perspective: 1)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                            .offset(y: -(getSafeArea().bottom + 20))
+                        if(currentIndex < 2)
+                        {
+                            Circle()
+                            // While increasing the scale the content will be visible...
+                                .frame(width: 80, height: 80)
+                                .scaleEffect(dotScale)
+                                .rotation3DEffect(.init(degrees: dotRotation), axis: (x: 0, y: 1, z: 0), anchorZ: dotState == .flipped ? -10 : 10, perspective: 1)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                                .offset(y: -(getSafeArea().bottom + 20))
+                            
+                        }
                     }
                 )
             
-            // For Tap Gesture....
-            Circle()
-                .foregroundColor(Color.black.opacity(0.01))
-                .frame(width: 80, height: 80)
-            // Arrow...
-                .overlay(
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.title)
-                        .foregroundColor(.white)
-                    //opactiy animation...
-                        .opacity(dotRotation == -180 ? 0 : 1)
-                        .animation(.easeInOut, value: dotRotation)
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                .onTapGesture(perform: {
-                    
-                    if isAnimating{return}
-                    
-                    isAnimating = true
-                    
-                    
-                    // Modifying for single Tap...
-                    
-                    // At mid of 1.5 just resetting the scale to again 1...
-                    // so that it will be look like dot inversion...
-                    
-                    withAnimation(.linear(duration: 1.5)){
-                        dotRotation = -180
-                        dotScale = 8
-                    }
-                    
-                    // To get correct timing ...
-                    // just trail and error the delay value....
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.725) {
+            if(currentIndex < 2)
+            {
+                // For Tap Gesture....
+                Circle()
+                    .foregroundColor(Color.black.opacity(0.01))
+                    .frame(width: 80, height: 80)
+                // Arrow...
+                    .overlay(
                         
-                        // 1.5/2 = 0.7
+                        Image(systemName: "chevron.right")
+                            .font(.title)
+                            .foregroundColor(.white)
+                        //opactiy animation...
+                            .opacity(dotRotation == -180 ? 0 : 1)
+                            .animation(.easeInOut, value: dotRotation)
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .onTapGesture(perform: {
                         
-                        // Updating Animation...
-                        withAnimation(.easeInOut(duration: 0.71)){
-                            dotState = .flipped
+                        if isAnimating{return}
+                        
+                        isAnimating = true
+                        
+                        
+                        // Modifying for single Tap...
+                        
+                        // At mid of 1.5 just resetting the scale to again 1...
+                        // so that it will be look like dot inversion...
+                        
+                        withAnimation(.linear(duration: 1.5)){
+                            dotRotation = -180
+                            dotScale = 8
                         }
-                    }
-                    
-                    // Reversing it with little Speed.
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         
-                        withAnimation(.easeInOut(duration: 0.5)){
-                            dotScale = 1
-                        }
-                    }
-                    
-                    // After 1.4s resetting isAnimating State...
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
-                        
-                        // Resetting to default....
-                        withAnimation(.easeInOut(duration: 0.3)){
+                        // To get correct timing ...
+                        // just trail and error the delay value....
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.725) {
                             
-                            dotRotation = 0
-                            dotState = .normal
+                            // 1.5/2 = 0.7
                             
-                            // updating index...
-                            // setting current index as next index...
-                            currentIndex = nextIndex
-                            // updating next index...
-                            nextIndex = getNextIndex()
+                            // Updating Animation...
+                            withAnimation(.easeInOut(duration: 0.71)){
+                                dotState = .flipped
+                            }
                         }
                         
-                        // Since animation has been added for 0.3s...
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        // Reversing it with little Speed.
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                             
-                            isAnimating = false
+                            withAnimation(.easeInOut(duration: 0.5)){
+                                dotScale = 1
+                            }
                         }
-                    }
-                })
-                .offset(y: -(getSafeArea().bottom + 20))
+                        
+                        // After 1.4s resetting isAnimating State...
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
+                            
+                            // Resetting to default....
+                            withAnimation(.easeInOut(duration: 0.3)){
+                                
+                                dotRotation = 0
+                                dotState = .normal
+                                
+                                // updating index...
+                                // setting current index as next index...
+                                currentIndex = nextIndex
+                                // updating next index...
+                                nextIndex = getNextIndex()
+                            }
+                            
+                            // Since animation has been added for 0.3s...
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                
+                                isAnimating = false
+                            }
+                        }
+                    })
+                    .offset(y: -(getSafeArea().bottom + 20))
+            }
             
         }
         .ignoresSafeArea()
@@ -165,8 +173,8 @@ struct DotInversion: View {
     @ViewBuilder
     func IntroView(tab: IntroTab)->some View {
         
-        VStack{
-            
+        
+        VStack {
             Image(tab.image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -199,13 +207,11 @@ struct DotInversion: View {
                     TextField("", text: $userName)
                         .placeHolder(Text("你的名字").foregroundColor(.white), show: userName.isEmpty)
                         .multilineTextAlignment(.center)
-                        .frame(width: UIScreen.main.bounds.width / 1.2, alignment: .bottom)
+                        .frame(width: UIScreen.main.bounds.width / 1.2)
                         .padding(.all, 20)
                         .background(Color("Green"))
-                        .cornerRadius(.infinity)
                         .overlay(RoundedRectangle(cornerRadius: .infinity).stroke(Color("DarkGrey"), lineWidth: 3))
-                        
-                    
+                        .cornerRadius(.infinity)
                 }
                 .frame(width: UIScreen.main.bounds.width / 1.2, alignment: .bottom)
                 .onDisappear {
@@ -217,11 +223,11 @@ struct DotInversion: View {
                     TextField("", text: $nickName)
                         .placeHolder(Text("你的暱稱").foregroundColor(.white), show: nickName.isEmpty)
                         .multilineTextAlignment(.center)
-                        .frame(width: UIScreen.main.bounds.width / 1.2, alignment: .bottom)
+                        .frame(width: UIScreen.main.bounds.width / 1.2)
                         .padding(.all, 20)
                         .background(Color("DarkGrey"))
-                        .cornerRadius(.infinity)
                         .overlay(RoundedRectangle(cornerRadius: .infinity).stroke(Color("Purple"), lineWidth: 3))
+                        .cornerRadius(.infinity)
                     
                 }
                 .frame(width: UIScreen.main.bounds.width / 1.2, alignment: .bottom)
@@ -230,6 +236,8 @@ struct DotInversion: View {
                 }
             }
         }
+        
+        
     }
     
     func getNextIndex() -> Int{
@@ -281,15 +289,19 @@ struct PlaceHolder<T: View>: ViewModifier {
     }
 }
 
-// Extending View to get Screen Rect...
+
 extension View {
     
-    func getRect()->CGRect{
+    func getRect() -> CGRect {
         return UIScreen.main.bounds
     }
     
-    func placeHolder<T:View>(_ holder: T, show: Bool) -> some View {
+    func placeHolder <T:View> (_ holder: T, show: Bool) -> some View {
         self.modifier(PlaceHolder(placeHolder:holder, show: show))
     }
     
+    func dissmissKeyboard()
+    {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
 }

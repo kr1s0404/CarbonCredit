@@ -8,7 +8,6 @@
 import SwiftUI
 import Firebase
 import SDWebImageSwiftUI
-import simd
 
 struct ProfileView: View
 {
@@ -23,15 +22,15 @@ struct ProfileView: View
     // 上傳大頭貼到Firebase
     var storageManager = StorageManager()
     
-    
-    // 用戶UID、email（取得資料的函數在onAppear）
-    @State var userName: String =  ""
-    @State var nickName: String =  ""
-    @State var userImageURL: String = ""
-    @State var sw:Bool=false
-    
     // 從Firebase上Fetch用戶資料
-    @ObservedObject var fetchUserInfo = FetchUserInfo()
+    @StateObject var fetchUserInfo = FetchUserInfo()
+    
+    // 用戶姓名、暱稱（取得資料的函數在onAppear）
+    @State var userName: String = ""
+    @State var nickName: String = ""
+    
+    // 顯示修改個人資料view
+    @State var showIntroView: Bool = false
     
     var body: some View
     {
@@ -53,28 +52,11 @@ struct ProfileView: View
                     Spacer()
                     Text("成功登入")
                     Spacer()
-                    Text("用戶姓名: \(userName)")
-                    Text("用戶暱稱: \(nickName)")
+                    Text("用戶姓名: \(fetchUserInfo.userName ?? "無")")
+                    Text("用戶暱稱: \(fetchUserInfo.nickName ?? "無")")
                     
-                    NavigationLink("修改", destination: IntroView())
                     
                     Spacer()
-                    Button(action: {
-                        storageManager.persistImageToStorage(userProfileImage: userProfileImage)
-                    }, label: {
-                        Text("儲存資料")
-                    })
-                    Spacer()
-                }
-                
-            }
-            .navigationTitle("個人資料")
-            .navigationBarTitleDisplayMode(.inline)
-            .padding()
-            .toolbar /// 登出區塊
-            {
-                ToolbarItemGroup(placement: .navigationBarTrailing)
-                {
                     Button(action: {
                         // 登出
                         DispatchQueue.global(qos: .background).async {
@@ -91,6 +73,25 @@ struct ProfileView: View
                             .foregroundColor(.red)
                             .padding(5)
                     })
+                    Spacer()
+                }
+                
+            }
+            .navigationTitle("個人資料")
+            .navigationBarTitleDisplayMode(.inline)
+            .padding()
+            .toolbar /// 登出區塊
+            {
+                ToolbarItemGroup(placement: .navigationBarTrailing)
+                {
+                    Button(action: {
+                        showIntroView.toggle()
+                    }) {
+                        Text("修改資料")
+                    }
+                    .sheet(isPresented: $showIntroView) {
+                        IntroView()
+                    }
                 }
                 
                 ToolbarItemGroup(placement: .navigationBarLeading)
@@ -98,24 +99,26 @@ struct ProfileView: View
                     Button(action: {
                         showImagePicker.toggle()
                     }) {
-                        Text("上傳大頭貼")
+                        Text("上傳照片")
                     }
                     .fullScreenCover(isPresented: $showImagePicker) {
                         ImagePicker(image: $userProfileImage)
                             .ignoresSafeArea()
+                            .onDisappear {
+                                storageManager.persistImageToStorage(userProfileImage: userProfileImage)
+                            }
                     }
                 }
             }
+            
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
             // 降低讀取照片資料大小
             URLCache.shared.memoryCapacity = 1024 * 1024 * 512
-            // 取得目前用戶UID、email
-            userName = fetchUserInfo.fetchUserName()
-            nickName = fetchUserInfo.nickName ?? ""
-            print("2.\(userName)")
-            print("2.\(nickName)")
+            
+            
+            
         }
     }
 }
